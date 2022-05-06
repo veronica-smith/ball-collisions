@@ -1,0 +1,55 @@
+#Veronica Smith
+#Mr. Radulovic
+#ICS2O
+#Function makes a grid out of number of rows/columns and window size
+
+def drawGrid(screen, num_rows, num_cols):
+    window.fill(white)
+    a = int(y / num_rows)
+    for i in range(0, y, a):
+        pygame.draw.line(window, black, (0, i), (x, i))
+    b = int(x / num_cols)
+    for i in range(0, x, b):
+        pygame.draw.line(window, black, (i, 0), (i, y))
+
+    #'m' and 'n' are used to assign the xy axis for odd number of rows/columns
+    m = y+a
+    m = m / 2
+    if num_rows % 2 == 0:
+        pygame.draw.line(window, black, (0, y / 2), (x, y / 2), 3)
+    else:
+        pygame.draw.line(window, black, (0, m), (x, m), 3)
+
+    n = x+b
+    n = n/2
+    if num_cols % 2 == 0:
+        pygame.draw.line(window, black, (x / 2, 0), (x / 2, y), 3)
+    else:
+        pygame.draw.line(window, black, (n, 0), (n, y), 3)
+
+
+import pygame
+pygame.init()
+x=400
+y=700
+window=(x,y)
+window = pygame.display.set_mode((x,y))
+pygame.display.set_caption('Intro to PyGame')
+clock = pygame.time.Clock()
+quit = False
+
+white=[255,255,255]
+black=[0,0,0]
+
+while not quit:
+    for event in pygame.event.get():
+        if event.type == pygame.QUIT:
+            quit = True
+
+    drawGrid(window, 7, 10)
+
+    pygame.display.update()
+    clock.tick(60)
+
+
+pygame.quit()

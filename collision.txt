@@ -1,0 +1,148 @@
+#ICS2O1 Assignment 2: COLLISIONS
+#Name: Veronica Smith
+#Mr. Radulovic
+#ICS2O1-08
+#May 14, 2018
+import pygame
+import random
+import math
+def distance(pos1, pos2): #function returns distance between 2 positions
+    return math.sqrt((pos2[0] - pos1[0])**2 + (pos2[1] - pos1[1])**2)
+pygame.init()
+WIDTH = 800
+HEIGHT = 600
+window = pygame.display.set_mode((WIDTH, HEIGHT))
+pygame.display.set_caption('PyGame Animation')
+clock = pygame.time.Clock()
+
+white=[255,255,255]
+red = [255,0,0]
+magenta = [255,0,255]
+orange = [255,128,0]
+yellow = [255,255,0]
+springgreen = [0,255,127]
+green = [0,255,0]
+turquois = [43,134,129]
+aqua = [0,255,255]
+blue = [0,0,255]
+purple = [178,58,238]
+lightpink = [255,182,193]
+grey = [200,200,200]
+black = [0,0,0]
+ColorList = [red, magenta, orange, yellow, springgreen, green, turquois, aqua, blue, purple, lightpink, grey]
+BallColor = []
+#appending random colors for the 1st 2 balls on window
+BallColor.append(random.choice(ColorList))
+BallColor.append(random.choice(ColorList))
+
+pygame.font.init()
+font1 = pygame.font.SysFont('Arial', 30)
+font2 = pygame.font.SysFont('Arial', 120)
+
+radius=[]
+MinRad = 10 #minimum radius of circle
+MaxRad = 50 #maximum radius of circle
+#appending random radii for the 1st 2 balls on window
+radius.append(random.randint(MinRad,MaxRad))
+radius.append(random.randint(MinRad,MaxRad))
+mouserad = 20
+
+position=[ ] #[x position, y position]
+#appending random positions for the 1st 2 balls on window
+position.append([random.randint(MaxRad,WIDTH - MaxRad), random.randint(MaxRad,HEIGHT - MaxRad)])
+position.append([random.randint(MaxRad,WIDTH - MaxRad), random.randint(MaxRad,HEIGHT - MaxRad)])
+
+speed = [] #[x speed, y speed]
+#appending random speeds for the 1st 2 balls on window
+speed.append([random.randint(-5,5), random.randint(-5,5)])
+speed.append([random.randint(-5,5), random.randint(-5,5)])
+SixtyTimes = 0 #it will add 1 every 60 seconds
+
+score = 1
+time = 1
+balls = 2 #number of balls on window (except mouseball)
+Lose = False
+
+quit = False
+while not quit:
+    window.fill(white)
+    for event in pygame.event.get():
+
+        if event.type == pygame.QUIT:
+            quit = True
+        elif event.type == pygame.MOUSEMOTION:
+            mousepos = event.pos
+
+    pygame.draw.circle(window, black, (mousepos), mouserad) #mouse circle
+
+    for i in range(balls):
+        #every 10 seconds, a new ball appears
+        #a random (x,y) position, (x,y) speed, and color is appended to its lists
+        if time == 10:
+            #position.append([random.randint(100, 600), random.randint(100, 500)])
+            radius.append(random.randint(10, 50))
+            position.append([random.randint(radius[i]+1, WIDTH-radius[i]-1), random.randint(radius[i]+1, HEIGHT-radius[i]-1)])
+            # +1/-1 so it doesn't start from the Window edge
+            speed.append([random.randint(-5, 5), random.randint(-5, 5)])
+            BallColor.append(random.choice(ColorList))
+            balls += 1
+            time = 0 #time is reset to 0 and will restart its counting (line 132)
+
+    for i in range(balls):
+        if SixtyTimes % 300 == 0: #every 5 seconds
+            speed[i][0] += 1
+            speed[i][1] += 1
+
+    for i in range(balls):
+        # ball movement: its speed is added to its positions
+        if Lose == False: #balls stop moving if game is lost
+            position[i][0] += speed[i][0]
+            position[i][1] += speed[i][1]
+        # for every ball, if it hits the window edge, it reverses its speed
+        if  position[i][0] >= WIDTH - radius[i]:
+            speed[i][0] *= -1
+        if  position[i][0] <= radius[i]:
+            speed[i][0] *= -1
+        if position[i][1] >= HEIGHT - radius[i]:
+            speed[i][1] *= -1
+        if position[i][1] <= radius[i]:
+            speed[i][1] *= -1
+
+    # ball reverse its speed if in contact with another ball
+    for i in range(balls - 1):
+        #'balls-1' because algorithm goes through all items in list,
+        # so all items that come before the last one has already been tested with the last one
+        j = i + 1    # 'i' and 'j' are never the same
+        while j < balls:
+            if distance((position[i]), (position[j])) <= radius[i] + radius[j]:
+                #if 2 balls come in contact, the speeds of both balls are reversed
+                speed[i][0] *= -1
+                speed[i][1] *= -1
+                speed[j][0] *= -1
+                speed[j][1] *= -1
+            j += 1 #new 'j' to compare with the same 'i' in the for loop
+
+    for i in range(balls): #ball is drawn
+        pygame.draw.circle(window, BallColor[i], (position[i][0], position[i][1]), radius[i])
+
+    #score
+    ScoreText = font1.render('SCORE: ' + str(score), False, (black))
+    window.blit(ScoreText, (300, 0))
+    if Lose == False:
+        SixtyTimes = SixtyTimes + 1
+    if SixtyTimes % 60 == 0: #when scoreNumber is added 60 times, the score will increase by 1 point
+        time += 1 #add 1 second
+        score += 1 #1 point = 1 second in the game
+
+    for i in range(balls):
+        if distance(mousepos, position[i]) <= radius[i] + mouserad:
+            #if mouse ball has contact with another ball
+            Lose = True
+            #score = 0
+            GameOverText = font2.render('GAME OVER', False, (black))
+    if Lose == True:
+        window.blit(GameOverText, (100, 100))
+
+    pygame.display.update()
+    clock.tick(60)
+pygame.quit()
